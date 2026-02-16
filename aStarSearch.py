@@ -53,3 +53,70 @@ def reconstruct_path(parent, start, goal):
     path.append(start)
     return list(reversed(path))
 
+def astar(grid, heuristic="manhattan"):
+    start = grid.start
+    goal = grid.goal
+
+    if heuristic == "manhattan":
+        h = lambda n: manhattan(n, goal)
+    else:
+        h = lambda n: euclidean(n, goal)
+
+    frontier = []
+    heapq.heappush(frontier, (h(start), 0, start))
+
+    parent = {}
+    bestCost = {start: 0}
+    explored = set()
+
+    generated = 1
+    max_frontier = 1
+
+    t0 = time.time()
+
+    while frontier:
+        max_frontier = max(max_frontier, len(frontier))
+
+        f, g, node = heapq.heappop(frontier)
+
+        if node in explored:
+            continue
+
+        explored.add(node)
+
+        if node == goal:
+            t1 = time.time()
+            path = reconstruct_path(parent, start, goal)
+            total_cost = sum(grid.cost(path[i], path[i+1]) for i in range(len(path)-1))
+            return {
+                "path": path,
+                "steps": len(path)-1,
+                "total_cost": total_cost,
+                "expanded": len(explored),
+                "generated": generated,
+                "max_frontier": max_frontier,
+                "runtime_ms": (t1 - t0)*1000,
+                "status": "success"
+            }
+
+        for nbr in grid.neighbors(node):
+            new_g = g + grid.cost(node, nbr)
+
+            if nbr not in bestCost or new_g < bestCost[nbr]:
+                bestCost[nbr] = new_g
+                parent[nbr] = node
+                f_nbr = new_g + h(nbr)
+                heapq.heappush(frontier, (f_nbr, new_g, nbr))
+                generated += 1
+
+    t1 = time.time()
+    return {
+        "path": [],
+        "steps": 0,
+        "total_cost": None,
+        "expanded": len(explored),
+        "generated": generated,
+        "max_frontier": max_frontier,
+        "runtime_ms": (t1 - t0)*1000,
+        "status": "failure"
+    }
