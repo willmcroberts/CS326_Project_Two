@@ -138,3 +138,11 @@ def two_opt_neighbors(tour):
             new_tour = tour[:]
             new_tour[i:j+1] = reversed(new_tour[i:j+1])
             yield new_tour
+
+def swap_neighbors(tour):
+    n = len(tour)
+    for i in range(n):
+        for j in range(i+1, n):
+            new_tour = tour[:]
+            new_tour[i], new_tour[j] = new_tour[j], new_tour[i]
+            yield new_tour
