@@ -36,6 +36,7 @@ class Grid:
     def cost(self, a, b):
         return self.costs[(a, b)]
 
+#A*
 def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -121,6 +122,7 @@ def astar(grid, heuristic="manhattan"):
         "status": "failure"
     }
 
+#TSP
 def tour_cost(cities, tour):
     total = 0.0
     for i in range(len(tour)):
@@ -217,3 +219,4 @@ def tsp_local_search(n_cities, width, height, restarts, operator):
         "runtime_ms": (t1 - t0)*1000,
         "status": "success"
     }
+
