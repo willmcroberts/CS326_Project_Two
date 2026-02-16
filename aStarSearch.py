@@ -157,3 +157,63 @@ def insert_neighbors(tour):
             city = new_tour.pop(i)
             new_tour.insert(j, city)
             yield new_tour
+
+def tsp_local_search(n_cities, width, height, restarts, operator):
+    cities = [(random.uniform(0, width), random.uniform(0, height))
+              for _ in range(n_cities)]
+
+    if operator == "twoopt":
+        neighbor_fn = two_opt_neighbors
+    elif operator == "swap":
+        neighbor_fn = swap_neighbors
+    else:
+        neighbor_fn = insert_neighbors
+
+    t0 = time.time()
+
+    best_overall_tour = None
+    best_overall_cost = float("inf")
+    iterations_list = []
+
+    for _ in range(restarts):
+        tour = list(range(n_cities))
+        random.shuffle(tour)
+        initial_tour = tour[:]
+        initial_cost = tour_cost(cities, tour)
+
+        improved = True
+        iterations = 0
+
+        while improved:
+            improved = False
+            iterations += 1
+            current_cost = tour_cost(cities, tour)
+
+            for nbr in neighbor_fn(tour):
+                nbr_cost = tour_cost(cities, nbr)
+                if nbr_cost < current_cost:
+                    tour = nbr
+                    current_cost = nbr_cost
+                    improved = True
+                    break
+
+        iterations_list.append(iterations)
+
+        if current_cost < best_overall_cost:
+            best_overall_cost = current_cost
+            best_overall_tour = tour[:]
+            best_initial_tour = initial_tour[:]
+            best_initial_cost = initial_cost
+
+    t1 = time.time()
+
+    return {
+        "cities": cities,
+        "initial_tour": best_initial_tour,
+        "initial_cost": best_initial_cost,
+        "best_tour": best_overall_tour,
+        "best_cost": best_overall_cost,
+        "iterations": iterations_list,
+        "runtime_ms": (t1 - t0)*1000,
+        "status": "success"
+    }
