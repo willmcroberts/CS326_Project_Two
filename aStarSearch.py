@@ -334,4 +334,31 @@ def is_legal_move_sequence(grid, path):
             return False
     return True
 
+def test_astar_start_end():
+    random.seed(42)
+    grid = Grid(5, 5, (0,0), (4,4), 1, 5)
+    result = astar(grid)
+    path = result["path"]
+    assert path[0] == (0,0), "A*: path does not start at S"
+    assert path[-1] == (4,4), "A*: path does not end at G"
+
+
+def test_astar_legal_moves():
+    random.seed(123)
+    grid = Grid(5, 5, (0,0), (4,4), 1, 5)
+    result = astar(grid)
+    path = result["path"]
+    assert is_legal_move_sequence(grid, path), "A*: illegal move in path"
+
+
+def test_astar_cost_matches():
+    random.seed(999)
+    grid = Grid(5, 5, (0,0), (4,4), 1, 10)
+    result = astar(grid)
+    path = result["path"]
+    reported = result["total_cost"]
+    recomputed = sum(grid.cost(path[i], path[i+1]) for i in range(len(path)-1))
+    assert reported == recomputed, f"A*: cost mismatch: {reported} vs {recomputed}"
+
+
 
