@@ -387,3 +387,25 @@ def test_tsp_hill_climbing_terminates():
     assert result["status"] == "success", "TSP: hill climbing did not terminate"
 
 
+def run_tests():
+    print("Running A* tests...")
+    test_astar_start_end()
+    print("✓ A*: path starts at S and ends at G")
+
+    test_astar_legal_moves()
+    print("✓ A*: every move in path is legal")
+
+    test_astar_cost_matches()
+    print("✓ A*: total cost matches recomputed cost")
+
+    print("\nRunning TSP tests...")
+    test_tsp_valid_tour()
+    print("✓ TSP: tour contains each city exactly once")
+
+    test_tsp_closed_cycle()
+    print("✓ TSP: tour is a valid cycle representation")
+
+    test_tsp_hill_climbing_terminates()
+    print("✓ TSP: hill climbing terminates")
+
+    print("\nAll tests passed!")
