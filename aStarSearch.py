@@ -42,3 +42,14 @@ def manhattan(a, b):
 def euclidean(a, b):
     return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
 
+def reconstruct_path(parent, start, goal):
+    if goal not in parent:
+        return []
+    path = []
+    node = goal
+    while node != start:
+        path.append(node)
+        node = parent[node]
+    path.append(start)
+    return list(reversed(path))
+
