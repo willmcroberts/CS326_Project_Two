@@ -408,11 +408,12 @@ def main():
             "status": result["status"]
         }
 
-    print(json.dumps(output, indent=4))
+    print("\nA* RESULTS:")
+    for k, v in output.items():
+        print(f"{k}: {v}")
 
     with open("results.json", "w") as f:
         json.dump(output, f, indent=4)
-
 
 if __name__ == "__main__":
     main()
