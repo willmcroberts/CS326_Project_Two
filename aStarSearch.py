@@ -146,3 +146,14 @@ def swap_neighbors(tour):
             new_tour = tour[:]
             new_tour[i], new_tour[j] = new_tour[j], new_tour[i]
             yield new_tour
+
+def insert_neighbors(tour):
+    n = len(tour)
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            new_tour = tour[:]
+            city = new_tour.pop(i)
+            new_tour.insert(j, city)
+            yield new_tour
