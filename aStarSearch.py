@@ -257,6 +257,10 @@ def main():
     args = parse_args()
     random.seed(args.seed)
 
+    if args.task == "tests":
+        run_tests()
+        return
+
     if args.task == "astar":
         grid = Grid(
             args.m, args.n,
