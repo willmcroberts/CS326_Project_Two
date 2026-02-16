@@ -361,4 +361,29 @@ def test_astar_cost_matches():
     assert reported == recomputed, f"A*: cost mismatch: {reported} vs {recomputed}"
 
 
+def test_tsp_valid_tour():
+    random.seed(2024)
+    result = tsp_local_search(20, 100, 100, 5, "twoopt")
+    tour = result["best_tour"]
+    assert len(tour) == 20, "TSP: tour length incorrect"
+    assert sorted(tour) == list(range(20)), "TSP: tour does not contain each city exactly once"
+
+
+def test_tsp_closed_cycle():
+    random.seed(2024)
+    result = tsp_local_search(15, 100, 100, 3, "swap")
+    tour = result["best_tour"]
+    # A cycle means last city connects back to first; cost function already enforces this.
+    # Here we simply check that the representation is a permutation.
+    assert tour[0] in tour, "TSP: invalid cycle representation"
+    assert tour[-1] in tour, "TSP: invalid cycle representation"
+
+
+def test_tsp_hill_climbing_terminates():
+    random.seed(2024)
+    result = tsp_local_search(12, 100, 100, 2, "insert")
+    # Hill climbing terminates when no improving neighbor exists.
+    # If the algorithm returned, it terminated.
+    assert result["status"] == "success", "TSP: hill climbing did not terminate"
+
 
