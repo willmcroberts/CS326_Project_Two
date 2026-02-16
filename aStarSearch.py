@@ -128,3 +128,13 @@ def tour_cost(cities, tour):
         b = cities[tour[(i+1) % len(tour)]]
         total += math.dist(a, b)
     return total
+
+def two_opt_neighbors(tour):
+    n = len(tour)
+    for i in range(n):
+        for j in range(i+2, n):
+            if i == 0 and j == n-1:
+                continue
+            new_tour = tour[:]
+            new_tour[i:j+1] = reversed(new_tour[i:j+1])
+            yield new_tour
