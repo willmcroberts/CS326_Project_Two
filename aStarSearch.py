@@ -1,10 +1,10 @@
-import argparse
 import json
 import math
 import random
 import time
 import heapq
-import sys
+
+
 class Grid:
     def __init__(self, m, n, start, goal, min_cost, max_cost):
         self.m = m
@@ -161,6 +161,7 @@ def insert_neighbors(tour):
             yield new_tour
 
 def tsp_local_search(n_cities, width, height, restarts, operator):
+    global best_initial_cost, best_initial_tour, current_cost
     cities = [(random.uniform(0, width), random.uniform(0, height))
               for _ in range(n_cities)]
 
@@ -220,67 +221,162 @@ def tsp_local_search(n_cities, width, height, restarts, operator):
         "status": "success"
     }
 
+
+#Tests
+def is_legal_move_sequence(grid, path):
+    if not path:
+        return False
+    for i in range(len(path)-1):
+        r1, c1 = path[i]
+        r2, c2 = path[i+1]
+        if abs(r1-r2) + abs(c1-c2) != 1:
+            return False
+        if not (0 <= r2 < grid.m and 0 <= c2 < grid.n):
+            return False
+    return True
+
+def test_astar_start_end():
+    random.seed(42)
+    grid = Grid(5,5,(0,0),(4,4),1,5)
+    result = astar(grid)
+    path = result["path"]
+    assert path[0] == (0,0)
+    assert path[-1] == (4,4)
+
+
+def test_astar_legal_moves():
+    random.seed(123)
+    grid = Grid(5,5,(0,0),(4,4),1,5)
+    result = astar(grid)
+    assert is_legal_move_sequence(grid, result["path"])
+
+
+def test_astar_cost_matches():
+    random.seed(999)
+    grid = Grid(5,5,(0,0),(4,4),1,10)
+    result = astar(grid)
+    path = result["path"]
+    reported = result["total_cost"]
+    recomputed = sum(grid.cost(path[i], path[i+1]) for i in range(len(path)-1))
+    assert reported == recomputed
+
+
+def test_tsp_valid_tour():
+    random.seed(2024)
+    result = tsp_local_search(20,100,100,5,"twoopt")
+    tour = result["best_tour"]
+    assert sorted(tour) == list(range(20))
+
+
+def test_tsp_closed_cycle():
+    random.seed(2024)
+    result = tsp_local_search(15,100,100,3,"swap")
+    tour = result["best_tour"]
+    assert len(tour) == len(set(tour))
+
+
+def test_tsp_hill_climbing_terminates():
+    random.seed(2024)
+    result = tsp_local_search(12,100,100,2,"insert")
+    assert result["status"] == "success"
+
+
+def run_tests():
+    print("Running A* tests...")
+    test_astar_start_end()
+    print("✓ A*: start/end correct")
+    test_astar_legal_moves()
+    print("✓ A*: legal moves")
+    test_astar_cost_matches()
+    print("✓ A*: cost matches")
+
+    print("\nRunning TSP tests...")
+    test_tsp_valid_tour()
+    print("✓ TSP: valid tour")
+    test_tsp_closed_cycle()
+    print("✓ TSP: closed cycle")
+    test_tsp_hill_climbing_terminates()
+    print("✓ TSP: hill climbing terminates")
+
+    print("\nAll tests passed!")
+
+def inputs():
+    print("Select task:")
+    print("1 = A* Search")
+    print("2 = TSP Local Search")
+    print("3 = Run Tests")
+    choice = input("Enter choice: ").strip()
+
+    if choice == "3":
+        return {"task": "tests"}
+
+    if choice == "1":
+        task = "astar"
+        m = int(input("Grid rows (m): "))
+        n = int(input("Grid cols (n): "))
+        rs = int(input("Start row: "))
+        cs = int(input("Start col: "))
+        rg = int(input("Goal row: "))
+        cg = int(input("Goal col: "))
+        min_cost = int(input("Min cost: "))
+        max_cost = int(input("Max cost: "))
+        heuristic = input("Heuristic (manhattan/euclidean): ").strip().lower()
+        seed = int(input("Random seed: "))
+        return {
+            "task": task, "m": m, "n": n,
+            "rs": rs, "cs": cs, "rg": rg, "cg": cg,
+            "min_cost": min_cost, "max_cost": max_cost,
+            "heuristic": heuristic, "seed": seed
+        }
+
+    else:
+        task = "tsp"
+        cities = int(input("Number of cities: "))
+        width = float(input("Width of bounding box: "))
+        height = float(input("Height of bounding box: "))
+        restarts = int(input("Random restarts: "))
+        operator = input("Operator (twoopt/swap/insert): ").strip().lower()
+        seed = int(input("Random seed: "))
+        return {
+            "task": task, "cities": cities,
+            "width": width, "height": height,
+            "restarts": restarts, "operator": operator,
+            "seed": seed
+        }
+
+
+
 #Main
-def parse_args():
-    parser = argparse.ArgumentParser(description="A* and TSP Local Search")
-    parser.add_argument("--task", type=str, choices=["astar", "tsp"], required=True)
-
-    # A*
-    parser.add_argument("--m", type=int)
-    parser.add_argument("--n", type=int)
-    parser.add_argument("--rs", type=int)
-    parser.add_argument("--cs", type=int)
-    parser.add_argument("--rg", type=int)
-    parser.add_argument("--cg", type=int)
-    parser.add_argument("--min_cost", type=int)
-    parser.add_argument("--max_cost", type=int)
-    parser.add_argument("--heuristic", type=str,
-                        choices=["manhattan", "euclidean"],
-                        default="manhattan")
-
-    # TSP
-    parser.add_argument("--cities", type=int)
-    parser.add_argument("--width", type=float)
-    parser.add_argument("--height", type=float)
-    parser.add_argument("--restarts", type=int)
-    parser.add_argument("--operator", type=str,
-                        choices=["twoopt", "swap", "insert"],
-                        default="twoopt")
-
-    parser.add_argument("--seed", type=int, required=True)
-    parser.add_argument("--output", type=str, default="results.json")
-
-    return parser.parse_args()
-
 
 def main():
-    args = parse_args()
-    random.seed(args.seed)
+    user = inputs()
 
-    if args.task == "tests":
+    if user["task"] == "tests":
         run_tests()
         return
 
-    if args.task == "astar":
+    random.seed(user["seed"])
+
+    if user["task"] == "astar":
         grid = Grid(
-            args.m, args.n,
-            (args.rs, args.cs),
-            (args.rg, args.cg),
-            args.min_cost, args.max_cost
+            user["m"], user["n"],
+            (user["rs"], user["cs"]),
+            (user["rg"], user["cg"]),
+            user["min_cost"], user["max_cost"]
         )
 
-        result = astar(grid, heuristic=args.heuristic)
+        result = astar(grid, heuristic=user["heuristic"])
 
         output = {
             "algorithm": "astar",
-            "m": args.m,
-            "n": args.n,
-            "start": [args.rs, args.cs],
-            "goal": [args.rg, args.cg],
-            "min_cost": args.min_cost,
-            "max_cost": args.max_cost,
-            "seed": args.seed,
-            "heuristic": args.heuristic,
+            "m": user["m"],
+            "n": user["n"],
+            "start": [user["rs"], user["cs"]],
+            "goal": [user["rg"], user["cg"]],
+            "min_cost": user["min_cost"],
+            "max_cost": user["max_cost"],
+            "seed": user["seed"],
+            "heuristic": user["heuristic"],
             "path": result["path"],
             "steps": result["steps"],
             "total_cost": result["total_cost"],
@@ -291,18 +387,18 @@ def main():
             "status": result["status"]
         }
 
-    else:  # TSP
+    else:
         result = tsp_local_search(
-            args.cities, args.width, args.height,
-            args.restarts, args.operator
+            user["cities"], user["width"], user["height"],
+            user["restarts"], user["operator"]
         )
 
         output = {
             "algorithm": "tsp local search",
-            "n_cities": args.cities,
-            "seed": args.seed,
-            "restarts": args.restarts,
-            "operator": args.operator,
+            "n_cities": user["cities"],
+            "seed": user["seed"],
+            "restarts": user["restarts"],
+            "operator": user["operator"],
             "initial_tour": result["initial_tour"],
             "initial_cost": result["initial_cost"],
             "best_tour": result["best_tour"],
@@ -314,102 +410,9 @@ def main():
 
     print(json.dumps(output, indent=4))
 
-    with open(args.output, "w") as f:
+    with open("results.json", "w") as f:
         json.dump(output, f, indent=4)
 
 
 if __name__ == "__main__":
     main()
-
-
-#Tests
-def is_legal_move_sequence(grid, path):
-    """Check that each move is up/down/left/right and in bounds."""
-    if not path:
-        return False
-    for i in range(len(path) - 1):
-        r1, c1 = path[i]
-        r2, c2 = path[i+1]
-        dr = abs(r1 - r2)
-        dc = abs(c1 - c2)
-        if dr + dc != 1:
-            return False
-        if not (0 <= r2 < grid.m and 0 <= c2 < grid.n):
-            return False
-    return True
-
-def test_astar_start_end():
-    random.seed(42)
-    grid = Grid(5, 5, (0,0), (4,4), 1, 5)
-    result = astar(grid)
-    path = result["path"]
-    assert path[0] == (0,0), "A*: path does not start at S"
-    assert path[-1] == (4,4), "A*: path does not end at G"
-
-
-def test_astar_legal_moves():
-    random.seed(123)
-    grid = Grid(5, 5, (0,0), (4,4), 1, 5)
-    result = astar(grid)
-    path = result["path"]
-    assert is_legal_move_sequence(grid, path), "A*: illegal move in path"
-
-
-def test_astar_cost_matches():
-    random.seed(999)
-    grid = Grid(5, 5, (0,0), (4,4), 1, 10)
-    result = astar(grid)
-    path = result["path"]
-    reported = result["total_cost"]
-    recomputed = sum(grid.cost(path[i], path[i+1]) for i in range(len(path)-1))
-    assert reported == recomputed, f"A*: cost mismatch: {reported} vs {recomputed}"
-
-
-def test_tsp_valid_tour():
-    random.seed(2024)
-    result = tsp_local_search(20, 100, 100, 5, "twoopt")
-    tour = result["best_tour"]
-    assert len(tour) == 20, "TSP: tour length incorrect"
-    assert sorted(tour) == list(range(20)), "TSP: tour does not contain each city exactly once"
-
-
-def test_tsp_closed_cycle():
-    random.seed(2024)
-    result = tsp_local_search(15, 100, 100, 3, "swap")
-    tour = result["best_tour"]
-    # A cycle means last city connects back to first; cost function already enforces this.
-    # Here we simply check that the representation is a permutation.
-    assert tour[0] in tour, "TSP: invalid cycle representation"
-    assert tour[-1] in tour, "TSP: invalid cycle representation"
-
-
-def test_tsp_hill_climbing_terminates():
-    random.seed(2024)
-    result = tsp_local_search(12, 100, 100, 2, "insert")
-    # Hill climbing terminates when no improving neighbor exists.
-    # If the algorithm returned, it terminated.
-    assert result["status"] == "success", "TSP: hill climbing did not terminate"
-
-
-def run_tests():
-    print("Running A* tests...")
-    test_astar_start_end()
-    print("✓ A*: path starts at S and ends at G")
-
-    test_astar_legal_moves()
-    print("✓ A*: every move in path is legal")
-
-    test_astar_cost_matches()
-    print("✓ A*: total cost matches recomputed cost")
-
-    print("\nRunning TSP tests...")
-    test_tsp_valid_tour()
-    print("✓ TSP: tour contains each city exactly once")
-
-    test_tsp_closed_cycle()
-    print("✓ TSP: tour is a valid cycle representation")
-
-    test_tsp_hill_climbing_terminates()
-    print("✓ TSP: hill climbing terminates")
-
-    print("\nAll tests passed!")
