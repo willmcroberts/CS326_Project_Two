@@ -317,3 +317,21 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+#Tests
+def is_legal_move_sequence(grid, path):
+    """Check that each move is up/down/left/right and in bounds."""
+    if not path:
+        return False
+    for i in range(len(path) - 1):
+        r1, c1 = path[i]
+        r2, c2 = path[i+1]
+        dr = abs(r1 - r2)
+        dc = abs(c1 - c2)
+        if dr + dc != 1:
+            return False
+        if not (0 <= r2 < grid.m and 0 <= c2 < grid.n):
+            return False
+    return True
+
+
