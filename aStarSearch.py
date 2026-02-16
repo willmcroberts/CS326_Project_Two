@@ -120,3 +120,11 @@ def astar(grid, heuristic="manhattan"):
         "runtime_ms": (t1 - t0)*1000,
         "status": "failure"
     }
+
+def tour_cost(cities, tour):
+    total = 0.0
+    for i in range(len(tour)):
+        a = cities[tour[i]]
+        b = cities[tour[(i+1) % len(tour)]]
+        total += math.dist(a, b)
+    return total
