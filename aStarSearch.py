@@ -253,4 +253,67 @@ def parse_args():
     return parser.parse_args()
 
 
+def main():
+    args = parse_args()
+    random.seed(args.seed)
+
+    if args.task == "astar":
+        grid = Grid(
+            args.m, args.n,
+            (args.rs, args.cs),
+            (args.rg, args.cg),
+            args.min_cost, args.max_cost
+        )
+
+        result = astar(grid, heuristic=args.heuristic)
+
+        output = {
+            "algorithm": "astar",
+            "m": args.m,
+            "n": args.n,
+            "start": [args.rs, args.cs],
+            "goal": [args.rg, args.cg],
+            "min_cost": args.min_cost,
+            "max_cost": args.max_cost,
+            "seed": args.seed,
+            "heuristic": args.heuristic,
+            "path": result["path"],
+            "steps": result["steps"],
+            "total_cost": result["total_cost"],
+            "expanded_states": result["expanded"],
+            "generated_nodes": result["generated"],
+            "max_frontier_size": result["max_frontier"],
+            "runtime_ms": result["runtime_ms"],
+            "status": result["status"]
+        }
+
+    else:  # TSP
+        result = tsp_local_search(
+            args.cities, args.width, args.height,
+            args.restarts, args.operator
+        )
+
+        output = {
+            "algorithm": "tsp local search",
+            "n_cities": args.cities,
+            "seed": args.seed,
+            "restarts": args.restarts,
+            "operator": args.operator,
+            "initial_tour": result["initial_tour"],
+            "initial_cost": result["initial_cost"],
+            "best_tour": result["best_tour"],
+            "best_cost": result["best_cost"],
+            "iterations": result["iterations"],
+            "runtime_ms": result["runtime_ms"],
+            "status": result["status"]
+        }
+
+    print(json.dumps(output, indent=4))
+
+    with open(args.output, "w") as f:
+        json.dump(output, f, indent=4)
+
+
+if __name__ == "__main__":
+    main()
 
