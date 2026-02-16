@@ -220,3 +220,37 @@ def tsp_local_search(n_cities, width, height, restarts, operator):
         "status": "success"
     }
 
+#Main
+def parse_args():
+    parser = argparse.ArgumentParser(description="A* and TSP Local Search")
+    parser.add_argument("--task", type=str, choices=["astar", "tsp"], required=True)
+
+    # A*
+    parser.add_argument("--m", type=int)
+    parser.add_argument("--n", type=int)
+    parser.add_argument("--rs", type=int)
+    parser.add_argument("--cs", type=int)
+    parser.add_argument("--rg", type=int)
+    parser.add_argument("--cg", type=int)
+    parser.add_argument("--min_cost", type=int)
+    parser.add_argument("--max_cost", type=int)
+    parser.add_argument("--heuristic", type=str,
+                        choices=["manhattan", "euclidean"],
+                        default="manhattan")
+
+    # TSP
+    parser.add_argument("--cities", type=int)
+    parser.add_argument("--width", type=float)
+    parser.add_argument("--height", type=float)
+    parser.add_argument("--restarts", type=int)
+    parser.add_argument("--operator", type=str,
+                        choices=["twoopt", "swap", "insert"],
+                        default="twoopt")
+
+    parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--output", type=str, default="results.json")
+
+    return parser.parse_args()
+
+
+
