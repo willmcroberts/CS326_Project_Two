@@ -31,7 +31,7 @@ class Grid:
         for dr, dc in [(1,0),(-1,0),(0,1),(0,-1)]:
             nr, nc = r + dr, c + dc
             if 0 <= nr < self.m and 0 <= nc < self.n:
-                yield (nr, nc)
+                yield nr, nc
 
     def cost(self, a, b):
         return self.costs[(a, b)]
@@ -373,17 +373,17 @@ def main():
             "n": user["n"],
             "start": [user["rs"], user["cs"]],
             "goal": [user["rg"], user["cg"]],
-            "min_cost": user["min_cost"],
-            "max_cost": user["max_cost"],
+            "min cost": user["min_cost"],
+            "max cost": user["max_cost"],
             "seed": user["seed"],
             "heuristic": user["heuristic"],
             "path": result["path"],
             "steps": result["steps"],
-            "total_cost": result["total_cost"],
-            "expanded_states": result["expanded"],
-            "generated_nodes": result["generated"],
-            "max_frontier_size": result["max_frontier"],
-            "runtime_ms": result["runtime_ms"],
+            "total cost": result["total_cost"],
+            "expanded states": result["expanded"],
+            "generated nodes": result["generated"],
+            "max frontier size": result["max_frontier"],
+            "runtime ms": result["runtime_ms"],
             "status": result["status"]
         }
 
@@ -395,20 +395,20 @@ def main():
 
         output = {
             "algorithm": "tsp local search",
-            "n_cities": user["cities"],
+            "cities": user["cities"],
             "seed": user["seed"],
             "restarts": user["restarts"],
             "operator": user["operator"],
-            "initial_tour": result["initial_tour"],
-            "initial_cost": result["initial_cost"],
-            "best_tour": result["best_tour"],
-            "best_cost": result["best_cost"],
+            "initial tour": result["initial_tour"],
+            "initial cost": result["initial_cost"],
+            "best tour": result["best_tour"],
+            "best cost": result["best_cost"],
             "iterations": result["iterations"],
-            "runtime_ms": result["runtime_ms"],
+            "runtime ms": result["runtime_ms"],
             "status": result["status"]
         }
 
-    print("\nA* RESULTS:")
+    print("\nRESULTS:")
     for k, v in output.items():
         print(f"{k}: {v}")
 
