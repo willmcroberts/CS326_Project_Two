@@ -415,5 +415,6 @@ def main():
     with open("results.json", "w") as f:
         json.dump(output, f, indent=4)
 
+# Run main
 if __name__ == "__main__":
     main()
