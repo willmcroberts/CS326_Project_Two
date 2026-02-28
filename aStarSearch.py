@@ -4,7 +4,7 @@ import random
 import time
 import heapq
 
-
+# CS 326 Project Two
 class Grid:
     def __init__(self, m, n, start, goal, min_cost, max_cost):
         self.m = m
@@ -346,7 +346,7 @@ def inputs():
 
 
 
-#Main
+# Main
 
 def main():
     user = inputs()
